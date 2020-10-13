@@ -1,0 +1,21 @@
+language: generic 
+sudo: required
+services:
+    - docker
+before_install:
+    - docker build -t yash199649/react-test -f ./client/Dockerfile.dev ./client/
+
+script:
+    - docker run -e CI=true yash199649/react-test npm test
+
+after_success:
+    - docker build -t yash199649/multi-client ./client
+    - docker build -t yash199649/multi-nginx ./nginx
+    - docker build -t yash199649/multi-server ./server
+    - docker build -t yash199649/multi-worker ./worker
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker push yash199649/multi-client
+    - docker push yash199649/multi-nginx 
+    - docker push yash199649/multi-server
+    - docker push yash199649/multi-worker
+
